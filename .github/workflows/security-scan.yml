@@ -2,7 +2,9 @@ name: Android Security Gate
 
 on:
   push:
+    branches: [ "main" ]
   pull_request:
+    branches: [ "main" ]
 
 permissions:
   contents: read
@@ -12,19 +14,22 @@ jobs:
   sast:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          distribution: temurin
-          java-version: '17'
+          python-version: '3.10'
+
+      - name: Install mobsfscan
+        run: pip install mobsfscan
 
       - name: Run mobsfscan
-        uses: MobSF/mobsfscan@v1
-        with:
-          args: --json --html --sarif --severity HIGH,CRITICAL ./app
+        # --exit: Exit with non-zero code if issues are found
+        # --severity: Set threshold for failure (high/critical)
+        # --json --html --sarif: Generate report formats for audit trail
+        run: mobsfscan . --json --output mobsfscan-result.json --html --output mobsfscan-result.html --sarif --output mobsfscan-result.sarif --exit --severity high
 
       - name: Upload reports
         if: always()
