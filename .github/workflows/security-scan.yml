@@ -1,0 +1,37 @@
+name: Android Security Gate
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  sast:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Run mobsfscan
+        uses: MobSF/mobsfscan@v1
+        with:
+          args: --json --html --sarif --severity HIGH,CRITICAL ./app
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-security-reports
+          path: |
+            mobsfscan-result.json
+            mobsfscan-result.html
+            mobsfscan-result.sarif
