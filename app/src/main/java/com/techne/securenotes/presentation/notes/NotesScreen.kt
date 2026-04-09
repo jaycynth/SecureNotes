@@ -20,7 +20,7 @@ import com.techne.securenotes.presentation.notes.components.NoteItem
 import com.techne.securenotes.presentation.util.Screen
 import kotlinx.coroutines.launch
 
-@OptIn(Material3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotesScreen(
     navController: NavController,

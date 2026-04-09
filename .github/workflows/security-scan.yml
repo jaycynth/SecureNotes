@@ -1,0 +1,41 @@
+name: Android Security Gate
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  sast:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install mobsfscan
+        run: pip install mobsfscan
+
+      - name: Run mobsfscan
+        # mobsfscan CLI does not support --severity or --exit directly in all versions.
+        # It fails by default if issues are found unless --no-fail is passed.
+        # We output to a file and ensure the scan runs on the project root.
+        run: mobsfscan --json -o mobsfscan-result.json --html -o mobsfscan-result.html .
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-security-reports
+          path: |
+            mobsfscan-result.json
+            mobsfscan-result.html
