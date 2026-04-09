@@ -26,10 +26,10 @@ jobs:
         run: pip install mobsfscan
 
       - name: Run mobsfscan
-        # --exit: Exit with non-zero code if issues are found
-        # --severity: Set threshold for failure (high/critical)
-        # --json --html --sarif: Generate report formats for audit trail
-        run: mobsfscan . --json --output mobsfscan-result.json --html --output mobsfscan-result.html --sarif --output mobsfscan-result.sarif --exit --severity high
+        # mobsfscan CLI does not support --severity or --exit directly in all versions.
+        # It fails by default if issues are found unless --no-fail is passed.
+        # We output to a file and ensure the scan runs on the project root.
+        run: mobsfscan --json -o mobsfscan-result.json --html -o mobsfscan-result.html .
 
       - name: Upload reports
         if: always()
@@ -39,4 +39,3 @@ jobs:
           path: |
             mobsfscan-result.json
             mobsfscan-result.html
-            mobsfscan-result.sarif
